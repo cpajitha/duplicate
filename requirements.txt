@@ -1,5 +1,5 @@
-pip install fastapi
-pip install uvicorn
-pip install httpx
-pip install requests
-pip install selenium
+fastapi
+uvicorn
+httpx
+requests
+selenium
