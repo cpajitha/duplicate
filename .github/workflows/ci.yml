@@ -29,9 +29,11 @@ jobs:
         run: |
           pytest -v testing_with_pytest.py
 
+      - name: Start FastAPI Server
+        run: uvicorn main:app --host 0.0.0.0 --port 8000 &
+      
       - name: Run unittest tests
-        run: |
-          python testing_with_unittest.py
+        run: python testing_with_unittest.py
 
       - name: Install Chrome for Selenium
         run: |
