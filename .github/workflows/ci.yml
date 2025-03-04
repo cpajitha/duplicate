@@ -31,12 +31,22 @@ jobs:
           sleep 10  # Give FastAPI some time to start
 
       - name: Check if FastAPI server is running
+        shell: powershell
         run: |
-          for i in {1..10}; do
-            curl -s http://127.0.0.1:8000/docs && break
-            echo "Waiting for server to start..."
-            sleep 3
-          done
+          $retries = 5
+          $delay = 5
+          for ($i = 0; $i -lt $retries; $i++) {
+              try {
+                  Invoke-WebRequest -Uri "http://127.0.0.1:8000/docs" -UseBasicParsing
+                  Write-Host "FastAPI server is up!"
+                  exit 0
+              } catch {
+                  Write-Host "FastAPI server not available yet. Retrying in $delay seconds..."
+                  Start-Sleep -Seconds $delay
+              }
+          }
+          Write-Host "FastAPI server failed to start."
+          exit 1
 
       - name: Run pytest tests
         run: pytest -v testing_with_pytest.py
