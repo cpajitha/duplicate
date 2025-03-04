@@ -1,0 +1,44 @@
+name: CI Pipeline
+
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest  # Change from ubuntu to Windows
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run pytest tests
+        run: |
+          pytest -v testing_with_pytest.py
+
+      - name: Run unittest tests
+        run: |
+          python testing_with_unittest.py
+
+      - name: Install Chrome for Selenium
+        run: |
+          choco install googlechrome -y
+          choco install chromedriver -y
+        shell: powershell
+
+      - name: Run Selenium tests
+        run: |
+          python testing_with_selenium.py
