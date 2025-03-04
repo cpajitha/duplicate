@@ -25,12 +25,17 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Run pytest tests
-        run: |
-          pytest -v testing_with_pytest.py
-
       - name: Start FastAPI Server
-        run: uvicorn main:app --host 0.0.0.0 --port 8000 &
+        run: |
+          uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 10  # Give FastAPI some time to start
+
+      - name: Check if FastAPI server is running
+        run: |
+          curl --retry 5 --retry-delay 5 --retry-connrefused http://127.0.0.1:8000/docs
+
+      - name: Run pytest tests
+        run: pytest -v testing_with_pytest.py
       
       - name: Run unittest tests
         run: python testing_with_unittest.py
@@ -42,5 +47,4 @@ jobs:
         shell: powershell
 
       - name: Run Selenium tests
-        run: |
-          python testing_with_selenium.py
+        run: python testing_with_selenium.py
