@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest  # Change from ubuntu to Windows
+    runs-on: windows-latest  # Running on Windows
 
     steps:
       - name: Checkout repository
@@ -27,25 +27,25 @@ jobs:
 
       - name: Start FastAPI Server
         run: |
-          uvicorn backend:app --host 0.0.0.0 --port 8000 &
-          sleep 10  # Give FastAPI some time to start
+          python backend.py &
+        shell: bash  # Ensures proper background execution
 
-      - name: Check if FastAPI server is running
+      - name: Wait for FastAPI Server
         shell: powershell
         run: |
-          $retries = 5
-          $delay = 5
+          $retries = 10
+          $delay = 3
           for ($i = 0; $i -lt $retries; $i++) {
               try {
                   Invoke-WebRequest -Uri "http://127.0.0.1:8000/docs" -UseBasicParsing
-                  Write-Host "FastAPI server is up!"
+                  Write-Host "✅ FastAPI server is up!"
                   exit 0
               } catch {
-                  Write-Host "FastAPI server not available yet. Retrying in $delay seconds..."
+                  Write-Host "⏳ FastAPI server not available yet. Retrying in $delay seconds..."
                   Start-Sleep -Seconds $delay
               }
           }
-          Write-Host "FastAPI server failed to start."
+          Write-Host "❌ FastAPI server failed to start."
           exit 1
 
       - name: Run pytest tests
