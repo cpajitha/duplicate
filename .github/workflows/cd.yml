@@ -27,6 +27,5 @@ jobs:
           echo "Deploying application..."
           # Add your actual deployment commands here
           # Example: python deploy_script.py
-          docker build -t myapp .
-          docker run -d -p 5000:5000 myapp
+         
 
