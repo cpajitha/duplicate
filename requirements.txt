@@ -1,3 +1,4 @@
+Python 3.10.0rc1
 pip install selenium
 pip install fastapi
 pip install uvicorn
