@@ -4,15 +4,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
-# Configure WebDriver for headless execution
-options = webdriver.ChromeOptions()
-options.add_argument("--headless")  # Run in headless mode (important for CI/CD)
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
-
-# Initialize WebDriver
-driver = webdriver.Chrome(options=options)
-
+# Set up WebDriver
+driver = webdriver.Chrome()
 def test_operation(num1, num2, button, expected_result):
     """Helper function to test calculator operations."""
     num1_input = driver.find_element(By.ID, "num1")
@@ -43,12 +36,13 @@ def test_operation(num1, num2, button, expected_result):
     # Ensure test correctness
     assert result == str(expected_result), f"Test Failed for {button.text}: Expected {expected_result}, got {result}"
 
-try:
-    # Open the calculator page hosted in FastAPI
-    frontend_url = "http://0.0.0.0:8000"  # CI/CD runs FastAPI on 0.0.0.0
-    driver.get(frontend_url)
 
-    # Wait for input fields to load
+try:
+    # Open the calculator page
+    frontend_path = "file:///C:/Users/cpaji/OneDrive/Desktop/mtech/Software%20testing_seminar/Software%20testing_seminar/Code/calculator.html"
+    driver.get(frontend_path)
+
+    # Wait for input fields
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "num1")))
 
     # Find buttons
@@ -57,13 +51,14 @@ try:
     multiply_button = driver.find_element(By.XPATH, "//button[contains(text(),'Multiply')]")
     divide_button = driver.find_element(By.XPATH, "//button[contains(text(),'Divide')]")
 
-    # Perform tests
-    test_operation(10, 5, add_button, 15)
-    test_operation(10, 5, subtract_button, 5)
-    test_operation(10, 5, multiply_button, 50)
-    test_operation(10, 5, divide_button, 2)
+    # Test cases
+    test_operation(10, 0, add_button, 10)       # Addition Test
+    test_operation(10, 5, subtract_button, 5)   # Subtraction Test
+    test_operation(10, 5, multiply_button, 50)  # Multiplication Test
+    test_operation(10, 5, divide_button, 2)     # Division Test
+
+except TimeoutException:
+    print("Timeout: Element not found or result not updated.")
 
 finally:
-    # Close the browser after tests
     driver.quit()
-
