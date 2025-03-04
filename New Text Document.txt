@@ -1,0 +1,54 @@
+C:\Users\cpaji\OneDrive\Desktop\mtech\Software testing_seminar\Software testing_seminar>python -m venv env
+
+C:\Users\cpaji\OneDrive\Desktop\mtech\Software testing_seminar\Software testing_seminar>env\Scripts\activate
+(env) C:\Users\cpaji\OneDrive\Desktop\mtech\Software testing_seminar\Software testing_seminar\Code>pip install uvicorn
+(env) C:\Users\cpaji\OneDrive\Desktop\mtech\Software testing_seminar\Software testing_seminar\Code>pip install fastapi
+(env) C:\Users\cpaji\OneDrive\Desktop\mtech\Software testing_seminar\Software testing_seminar\Code>python backend.py
+←[32mINFO←[0m:     Started server process [←[36m12356←[0m]
+←[32mINFO←[0m:     Waiting for application startup.
+←[32mINFO←[0m:     Application startup complete.
+←[32mINFO←[0m:     Uvicorn running on ←[1mhttp://localhost:8000←[0m (Press CTRL+C to quit)
+
+(env) C:\Users\cpaji\OneDrive\Desktop\mtech\Software testing_seminar\Software testing_seminar>pytest -v
+(env) C:\Users\cpaji\OneDrive\Desktop\mtech\Software testing_seminar\Software testing_seminar\Code>pip install httpx
+(env) C:\Users\cpaji\OneDrive\Desktop\mtech\Software testing_seminar\Software testing_seminar\Code>pytest -v
+========================================================================= test session starts =========================================================================
+platform win32 -- Python 3.10.0rc1, pytest-8.3.5, pluggy-1.5.0 -- c:\users\cpaji\onedrive\desktop\mtech\software testing_seminar\software testing_seminar\env\scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\cpaji\OneDrive\Desktop\mtech\Software testing_seminar\Software testing_seminar\Code
+plugins: anyio-4.8.0
+collected 5 items
+
+test_1.py::test_add PASSED                                                                                                                                       [ 20%]
+test_1.py::test_subtract PASSED                                                                                                                                  [ 40%]
+test_1.py::test_multiply PASSED                                                                                                                                  [ 60%]
+test_1.py::test_divide PASSED                                                                                                                                    [ 80%]
+test_1.py::test_divide_by_zero PASSED                                                                                                                            [100%]
+
+========================================================================== 5 passed in 4.86s ==========================================================================
+
+Unittest
+---------
+pip install requests
+(env) C:\Users\cpaji\OneDrive\Desktop\mtech\Software testing_seminar\Software testing_seminar\Code>python testing_with_unittest.py
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 3.288s
+
+OK
+
+Selenium
+-----------------
+(env) C:\Users\cpaji\OneDrive\Desktop\mtech\Software testing_seminar\Software testing_seminar\Code>pip install selenium
+(env) C:\Users\cpaji\OneDrive\Desktop\mtech\Software testing_seminar\Software testing_seminar\Code>python testing_with_selenium.py
+Error sending stats to Plausible: error sending request for url (https://plausible.io/api/event)
+
+DevTools listening on ws://127.0.0.1:53042/devtools/browser/4c9f51e1-22bc-4789-a5d1-cd0f8cb3b096
+Clicking button: Add
+Result: 10 Add 0 = 10
+Clicking button: Subtract
+Result: 10 Subtract 5 = 5
+Clicking button: Multiply
+Result: 10 Multiply 5 = 50
+Clicking button: Divide
+Result: 10 Divide 5 = 2
