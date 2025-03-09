@@ -56,4 +56,4 @@ jobs:
         run: python testing_with_unittest.py
 
       - name: Run Selenium tests
-        run: python selenium.py
+        run: python selenium_test.py
