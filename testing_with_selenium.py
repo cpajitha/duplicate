@@ -54,7 +54,7 @@ try:
     add_button = driver.find_element(By.XPATH, "//button[contains(text(),'Add')]")
     subtract_button = driver.find_element(By.XPATH, "//button[contains(text(),'Subtract')]")
     multiply_button = driver.find_element(By.XPATH, "//button[contains(text(),'Multiply')]")
-        divide_button = driver.find_element(By.XPATH, "//button[contains(text(),'Divide')]")
+    divide_button = driver.find_element(By.XPATH, "//button[contains(text(),'Divide')]")
 
     # Perform tests
     test_operation(10, 5, add_button, 15)
