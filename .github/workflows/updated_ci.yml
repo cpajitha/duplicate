@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest  # Running on Windows
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
@@ -24,11 +24,15 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install selenium webdriver-manager
+          pip install selenium webdriver-manager uvicorn fastapi
 
       - name: Start FastAPI Server
         run: |
-          Start-Process -NoNewWindow -FilePath "python" -ArgumentList "backend.py"
+          Start-Process -NoNewWindow -FilePath "uvicorn" -ArgumentList "backend:app --host 0.0.0.0 --port 8000" -RedirectStandardOutput "fastapi.log"
+        shell: powershell
+
+      - name: Debug FastAPI Logs
+        run: Get-Content fastapi.log
         shell: powershell
 
       - name: Wait for FastAPI Server
