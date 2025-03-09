@@ -1,78 +1,67 @@
-name: CI Pipeline
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
-on: 
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+# Configure WebDriver for headless execution
+options = webdriver.ChromeOptions()
+options.add_argument("--headless")  # Run in headless mode (important for CI/CD)
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
 
-jobs:
-  build:
-    runs-on: windows-latest  # Running on Windows
+# Initialize WebDriver
+driver = webdriver.Chrome(options=options)
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+def test_operation(num1, num2, button, expected_result):
+    """Helper function to test calculator operations."""
+    num1_input = driver.find_element(By.ID, "num1")
+    num2_input = driver.find_element(By.ID, "num2")
+    result_span = driver.find_element(By.ID, "result")
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10.0"
+    # Clear the result field before each operation
+    driver.execute_script("arguments[0].innerText = '';", result_span)
 
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install selenium chromedriver-autoinstaller
+    # Enter values
+    num1_input.clear()
+    num1_input.send_keys(str(num1))
 
-      - name: Install Chrome and Chromedriver
-        shell: powershell
-        run: |
-          choco install googlechrome -y
-          choco install chromedriver -y
+    num2_input.clear()
+    num2_input.send_keys(str(num2))
 
-      - name: Verify Chrome installation
-        shell: powershell
-        run: |
-          $chromePath = (Get-Command chrome).Source
-          if ($chromePath) {
-              Write-Host "✅ Chrome found at $chromePath"
-          } else {
-              Write-Host "❌ Chrome not found"
-              exit 1
-          }
+    # Click the button
+    print(f"Clicking button: {button.text}")  # Debugging
+    button.click()
 
-      - name: Start FastAPI Server
-        run: |
-          uvicorn backend:app --host 0.0.0.0 --port 8000 &
-        shell: bash  # Ensures proper background execution
+    # Wait for the result to update
+    WebDriverWait(driver, 5).until(lambda d: result_span.text.strip() != "")
 
-      - name: Wait for FastAPI Server
-        shell: powershell
-        run: |
-          $retries = 10
-          $delay = 3
-          for ($i = 0; $i -lt $retries; $i++) {
-              try {
-                  Invoke-WebRequest -Uri "http://127.0.0.1:8000/docs" -UseBasicParsing
-                  Write-Host "✅ FastAPI server is up!"
-                  exit 0
-              } catch {
-                  Write-Host "⏳ FastAPI server not available yet. Retrying in $delay seconds..."
-                  Start-Sleep -Seconds $delay
-              }
-          }
-          Write-Host "❌ FastAPI server failed to start."
-          exit 1
+    # Get the result
+    result = result_span.text.strip()
+    print(f"Result: {num1} {button.text} {num2} = {result}")
 
-      - name: Run pytest tests
-        run: pytest -v testing_with_pytest.py
-      
-      - name: Run unittest tests
-        run: python testing_with_unittest.py
+    # Ensure test correctness
+    assert result == str(expected_result), f"Test Failed for {button.text}: Expected {expected_result}, got {result}"
 
-      - name: Run Selenium tests
-        run: python testing_with_selenium.py
-        env:
-          PATH: ${{ runner.tool_cache }}/chromedriver:$PATH
+try:
+    # Open the calculator page hosted in FastAPI
+    frontend_url = "http://0.0.0.0:8000"  # CI/CD runs FastAPI on 0.0.0.0
+    driver.get(frontend_url)
+
+    # Wait for input fields to load
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "num1")))
+
+    # Find buttons
+    add_button = driver.find_element(By.XPATH, "//button[contains(text(),'Add')]")
+    subtract_button = driver.find_element(By.XPATH, "//button[contains(text(),'Subtract')]")
+    multiply_button = driver.find_element(By.XPATH, "//button[contains(text(),'Multiply')]")
+        divide_button = driver.find_element(By.XPATH, "//button[contains(text(),'Divide')]")
+
+    # Perform tests
+    test_operation(10, 5, add_button, 15)
+    test_operation(10, 5, subtract_button, 5)
+    test_operation(10, 5, multiply_button, 50)
+    test_operation(10, 5, divide_button, 2)
+
+finally:
+    # Close the browser after tests
+    driver.quit()
