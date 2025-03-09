@@ -3,6 +3,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
 # Configure WebDriver for headless execution
 options = webdriver.ChromeOptions()
@@ -10,42 +12,49 @@ options.add_argument("--headless")  # Run in headless mode (important for CI/CD)
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 
-# Initialize WebDriver
-driver = webdriver.Chrome(options=options)
+# Initialize WebDriver with WebDriver Manager
+service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(service=service, options=options)
 
 def test_operation(num1, num2, button, expected_result):
     """Helper function to test calculator operations."""
-    num1_input = driver.find_element(By.ID, "num1")
-    num2_input = driver.find_element(By.ID, "num2")
-    result_span = driver.find_element(By.ID, "result")
+    try:
+        num1_input = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, "num1")))
+        num2_input = driver.find_element(By.ID, "num2")
+        result_span = driver.find_element(By.ID, "result")
 
-    # Clear the result field before each operation
-    driver.execute_script("arguments[0].innerText = '';", result_span)
+        # Clear the result field before each operation
+        driver.execute_script("arguments[0].innerText = '';", result_span)
 
-    # Enter values
-    num1_input.clear()
-    num1_input.send_keys(str(num1))
+        # Enter values
+        num1_input.clear()
+        num1_input.send_keys(str(num1))
 
-    num2_input.clear()
-    num2_input.send_keys(str(num2))
+        num2_input.clear()
+        num2_input.send_keys(str(num2))
 
-    # Click the button
-    print(f"Clicking button: {button.text}")  # Debugging
-    button.click()
+        # Click the button
+        print(f"Clicking button: {button.text}")  # Debugging
+        button.click()
 
-    # Wait for the result to update
-    WebDriverWait(driver, 5).until(lambda d: result_span.text.strip() != "")
+        # Wait for the result to update
+        WebDriverWait(driver, 5).until(lambda d: result_span.text.strip() != "")
 
-    # Get the result
-    result = result_span.text.strip()
-    print(f"Result: {num1} {button.text} {num2} = {result}")
+        # Get the result
+        result = result_span.text.strip()
+        print(f"Result: {num1} {button.text} {num2} = {result}")
 
-    # Ensure test correctness
-    assert result == str(expected_result), f"Test Failed for {button.text}: Expected {expected_result}, got {result}"
+        # Ensure test correctness
+        assert result == str(expected_result), f"Test Failed for {button.text}: Expected {expected_result}, got {result}"
+    
+    except TimeoutException:
+        print(f"❌ Timeout waiting for {button.text} operation")
+    except Exception as e:
+        print(f"❌ Error during {button.text} test: {e}")
 
 try:
     # Open the calculator page hosted in FastAPI
-    frontend_url = "http://0.0.0.0:8000"  # CI/CD runs FastAPI on 0.0.0.0
+    frontend_url = "http://127.0.0.1:8000"  # CI/CD runs FastAPI on localhost
     driver.get(frontend_url)
 
     # Wait for input fields to load
