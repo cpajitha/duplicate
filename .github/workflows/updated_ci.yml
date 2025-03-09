@@ -24,18 +24,18 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install webdriver-manager selenium
+          pip install selenium webdriver-manager
 
       - name: Start FastAPI Server
         run: |
-          uvicorn backend:app --host 0.0.0.0 --port 8000 &
-        shell: bash  # Ensures proper background execution
+          Start-Process -NoNewWindow -FilePath "python" -ArgumentList "backend.py"
+        shell: powershell
 
       - name: Wait for FastAPI Server
         shell: powershell
         run: |
           $retries = 10
-          $delay = 3
+          $delay = 5
           for ($i = 0; $i -lt $retries; $i++) {
               try {
                   Invoke-WebRequest -Uri "http://127.0.0.1:8000/docs" -UseBasicParsing
