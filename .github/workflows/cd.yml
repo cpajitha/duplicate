@@ -7,7 +7,10 @@ on:
 
 jobs:
   deploy:
-    runs-on: windows-latest  # Changed from ubuntu to windows
+    needs: build  # This ensures CI completes before CD starts
+    runs-on: windows-latest
+
+    
 
     steps:
       - name: Checkout repository
