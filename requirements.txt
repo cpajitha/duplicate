@@ -4,4 +4,3 @@ httpx
 requests
 selenium
 pytest
-webdriver-manager
