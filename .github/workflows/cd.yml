@@ -26,7 +26,6 @@ jobs:
       - name: Deploy to Server
         run: |
           echo "Deploying application..."
-          run: docker-compose up -d --build
 
           # Add your actual deployment commands here
           # Example: python deploy_script.py
