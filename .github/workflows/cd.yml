@@ -2,7 +2,7 @@ name: CD Pipeline
 
 on:
   workflow_run:
-    workflows: ["CI Pipeline"]  # Ensures CD runs only after CI Pipeline completes
+    workflows: ["CI Pipeline"]
     types:
       - completed
 
@@ -19,7 +19,11 @@ jobs:
 
       - name: Log in to Docker Hub
         shell: powershell
-        run: echo $env:DOCKER_PASSWORD | docker login --username $env:DOCKER_USERNAME --password-stdin
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo $env:DOCKER_PASSWORD | docker login --username $env:DOCKER_USERNAME --password-stdin
 
       - name: Push Docker image
         run: docker push cpajitha/fastapi_app:latest
