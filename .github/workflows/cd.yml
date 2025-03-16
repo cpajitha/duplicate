@@ -14,18 +14,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10.0"
+      - name: Build Docker image
+        run: docker build -t myusername/fastapi_app:latest .
 
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+      - name: Log in to Docker Hub
+        shell: powershell
+        run: echo $env:DOCKER_PASSWORD | docker login --username $env:DOCKER_USERNAME --password-stdin
+
+      - name: Push Docker image
+        run: docker push myusername/fastapi_app:latest
 
       - name: Deploy to Server
         run: |
           echo "Deploying application..."
-
-          # Add your actual deployment commands here
-          # Example: python deploy_script.py
+          # Add your actual deployment commands here (e.g. running a deployment script)
