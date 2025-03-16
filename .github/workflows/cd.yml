@@ -27,4 +27,4 @@ jobs:
       - name: Deploy to Server
         run: |
           echo "Deploying application..."
-          # Add your actual deployment commands here (e.g., running a deployment script)
+          # Add your actual deployment commands here
