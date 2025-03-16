@@ -1,7 +1,7 @@
-# Use an official Python runtime as a base image
-FROM python:3.10-slim
+# Use a Windows Server Core base image with Python 3.10
+FROM python:3.10-windowsservercore-ltsc2022
 
-# Prevent Python from writing pyc files to disc and enable stdout/stderr logging
+# Prevent Python from writing pyc files to disk and enable stdout/stderr logging
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
@@ -12,7 +12,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Upgrade pip and install dependencies
-RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code into the container
 COPY . .
