@@ -26,11 +26,25 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Log in to Docker Hub
+        shell: powershell
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo $env:DOCKER_PASSWORD | docker login --username $env:DOCKER_USERNAME --password-stdin
+
       - name: Build Docker image
-        run: docker build -t fastapi_app .
+        run: docker build -t cpajitha/fastapi_app:${{ github.sha }} .
+
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker tag cpajitha/fastapi_app:${{ github.sha }} cpajitha/fastapi_app:latest
+          docker push cpajitha/fastapi_app:${{ github.sha }}
+          docker push cpajitha/fastapi_app:latest
 
       - name: Run Docker container
-        run: docker run -d --name fastapi_container -p 8000:8000 fastapi_app
+        run: docker run -d --name fastapi_container -p 8000:8000 cpajitha/fastapi_app:${{ github.sha }}
 
       - name: Wait for FastAPI Server in Docker container
         shell: powershell
@@ -69,4 +83,4 @@ jobs:
         if: always()
         run: |
           docker stop fastapi_container
-          docker rm fastapi_container
+          docker rm fastapi_container         
