@@ -11,12 +11,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Build Docker image
-        run: docker build -t cpajitha/fastapi_app:latest .
-
       - name: Log in to Docker Hub
         shell: powershell
         env:
@@ -25,10 +19,14 @@ jobs:
         run: |
           echo $env:DOCKER_PASSWORD | docker login --username $env:DOCKER_USERNAME --password-stdin
 
-      - name: Push Docker image
-        run: docker push cpajitha/fastapi_app:latest
+      - name: Pull Docker image from Docker Hub
+        run: |
+          docker pull cpajitha/fastapi_app:latest
+          docker tag cpajitha/fastapi_app:latest fastapi_app:latest
 
       - name: Deploy to Server
         run: |
-          echo "Deploying application..."
-          # Add your actual deployment commands here
+          docker stop fastapi_container || true
+          docker rm fastapi_container || true
+          docker run -d --name fastapi_container -p 8000:8000 fastapi_app:latest
+          echo "✅ Deployment successful!"
