@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Changed to Ubuntu for better compatibility
+    runs-on: windows-latest  # Changed to Ubuntu for better compatibility
 
     steps:
       - name: Checkout repository
