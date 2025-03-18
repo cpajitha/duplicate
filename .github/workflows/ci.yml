@@ -26,6 +26,35 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Install Chrome and Chromedriver for Selenium
+        run: |
+          sudo apt update
+          sudo apt install -y wget curl unzip xvfb
+          
+          # Install Google Chrome
+          wget -q -O google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome.deb || sudo apt-get -f install -y
+          
+          # Get Chrome version
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+' | head -1)
+          
+          # Fetch latest matching Chromedriver version
+          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
+          
+          # Download and install Chromedriver
+          wget -q -O chromedriver.zip "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
+          unzip chromedriver.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
+          
+          # Verify installation
+          google-chrome --version
+          chromedriver --version
+
+      - name: Run Selenium tests
+        run: |
+          xvfb-run --auto-servernum python testing_with_selenium.py  # Headless mode
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -69,24 +98,8 @@ jobs:
       - name: Run unittest tests
         run: python testing_with_unittest.py
 
-      - name: Install Chrome and Chromedriver for Selenium
-        run: |
-          sudo apt update
-          sudo apt install -y wget curl unzip
-          wget -q -O google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg -i google-chrome.deb || sudo apt -f install -y
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
-          wget -q -O chromedriver.zip "https://chromedriver.storage.googleapis.com/$CHROME_VERSION/chromedriver_linux64.zip"
-          unzip chromedriver.zip
-          sudo mv chromedriver /usr/local/bin/
-          chromedriver --version
-
-      - name: Run Selenium tests
-        run: python testing_with_selenium.py
-
       - name: Stop and Remove Docker container
         if: always()
         run: |
           docker stop fastapi_container || true
           docker rm fastapi_container || true
-
