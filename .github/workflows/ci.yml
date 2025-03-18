@@ -89,3 +89,4 @@ jobs:
         run: |
           docker stop fastapi_container || true
           docker rm fastapi_container || true
+
