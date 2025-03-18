@@ -29,35 +29,28 @@ jobs:
       - name: Install Chrome and Chromedriver for Selenium
         run: |
           sudo apt update
-          sudo apt install -y wget curl unzip xvfb libgbm1 libnspr4 \
+          sudo apt install -y wget curl unzip jq xvfb libgbm1 libnspr4 \
                               libnss3 libx11-xcb1 libxcomposite1 libxcursor1 \
                               libxdamage1 libxfixes3 libxi6 libxrandr2 libxss1 libxtst6
           
-          # Install Google Chrome
+          # Install Google Chrome (latest stable version)
           wget -q -O google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo dpkg -i google-chrome.deb || sudo apt-get -f install -y
           google-chrome --version
 
-          # Get the Chrome major version
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f1,2,3)
-          echo "Chrome Version: $CHROME_VERSION"
+          # Fetch latest Chromedriver compatible with installed Chrome
+          LATEST_DRIVER_URL=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/latest-available/linux64.json" | jq -r '.chromedriver')
+          echo "Downloading Chromedriver from: $LATEST_DRIVER_URL"
 
-          # Get the compatible Chromedriver version
-          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
-          echo "Chromedriver Version: $CHROMEDRIVER_VERSION"
-
-          # Download and install Chromedriver
-          wget -q -O chromedriver.zip "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
-
-          if [ -f chromedriver.zip ]; then
-              unzip chromedriver.zip
-              sudo mv chromedriver /usr/local/bin/
-              sudo chmod +x /usr/local/bin/chromedriver
-          else
-              echo "Chromedriver download failed!"
+          wget -q -O chromedriver.zip "$LATEST_DRIVER_URL"
+          if [ ! -s chromedriver.zip ]; then
+              echo "❌ Chromedriver download failed!"
               exit 1
           fi
 
+          unzip chromedriver.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
           chromedriver --version
 
       - name: Run Selenium tests
