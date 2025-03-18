@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -25,4 +25,4 @@ jobs:
           docker pull cpajitha/fastapi_app:latest
           docker stop fastapi_container || true
           docker rm fastapi_container || true
-          docker run -d --name fastapi_container -p 8000:8000 cpajitha/fastapi_app:latest  
+          docker run -d --name fastapi_container -p 8000:8000 cpajitha/fastapi_app:latest
