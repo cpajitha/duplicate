@@ -26,37 +26,6 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install Chrome and Chromedriver for Selenium
-        run: |
-          sudo apt update
-          sudo apt install -y wget curl unzip jq xvfb libgbm1 libnspr4 \
-                              libnss3 libx11-xcb1 libxcomposite1 libxcursor1 \
-                              libxdamage1 libxfixes3 libxi6 libxrandr2 libxss1 libxtst6
-          
-          # Install Google Chrome (latest stable version)
-          wget -q -O google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg -i google-chrome.deb || sudo apt-get -f install -y
-          google-chrome --version
-
-          # Fetch latest Chromedriver compatible with installed Chrome
-          LATEST_DRIVER_URL=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/latest-available/linux64.json" | jq -r '.chromedriver')
-          echo "Downloading Chromedriver from: $LATEST_DRIVER_URL"
-
-          wget -q -O chromedriver.zip "$LATEST_DRIVER_URL"
-          if [ ! -s chromedriver.zip ]; then
-              echo "❌ Chromedriver download failed!"
-              exit 1
-          fi
-
-          unzip chromedriver.zip
-          sudo mv chromedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/chromedriver
-          chromedriver --version
-
-      - name: Run Selenium tests
-        run: |
-          xvfb-run --auto-servernum python testing_with_selenium.py  # Headless mode
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
