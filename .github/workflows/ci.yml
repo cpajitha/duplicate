@@ -27,8 +27,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Log in to Docker Hub
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build Docker image
         run: docker build -t cpajitha/fastapi_app:${{ github.sha }} .
@@ -43,21 +42,19 @@ jobs:
         run: docker run -d --name fastapi_container -p 8000:8000 cpajitha/fastapi_app:${{ github.sha }}
 
       - name: Wait for FastAPI Server in Docker container
-        shell: powershell
         run: |
-          $retries = 10
-          $delay = 3
-          for ($i = 0; $i -lt $retries; $i++) {
-              try {
-                  Invoke-WebRequest -Uri "http://127.0.0.1:8000/docs" -UseBasicParsing
-                  Write-Host "✅ FastAPI server is up!"
+          retries=10
+          delay=3
+          for i in $(seq 1 $retries); do
+              if curl -s http://127.0.0.1:8000/docs; then
+                  echo "✅ FastAPI server is up!"
                   exit 0
-              } catch {
-                  Write-Host "⏳ FastAPI server not available yet. Retrying in $delay seconds..."
-                  Start-Sleep -Seconds $delay
-              }
-          }
-          Write-Host "❌ FastAPI server failed to start."
+              else
+                  echo "⏳ FastAPI server not available yet. Retrying in $delay seconds..."
+                  sleep $delay
+              fi
+          done
+          echo "❌ FastAPI server failed to start."
           exit 1
 
       - name: Run pytest tests
@@ -66,11 +63,17 @@ jobs:
       - name: Run unittest tests
         run: python testing_with_unittest.py
 
-      - name: Install Chrome for Selenium
+      - name: Install Chrome and Chromedriver for Selenium
         run: |
-          choco install googlechrome -y
-          choco install chromedriver -y
-        shell: powershell
+          sudo apt update
+          sudo apt install -y wget curl unzip
+          wget -q -O google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome.deb || sudo apt -f install -y
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+          wget -q -O chromedriver.zip "https://chromedriver.storage.googleapis.com/$CHROME_VERSION/chromedriver_linux64.zip"
+          unzip chromedriver.zip
+          sudo mv chromedriver /usr/local/bin/
+          chromedriver --version
 
       - name: Run Selenium tests
         run: python testing_with_selenium.py
@@ -78,6 +81,5 @@ jobs:
       - name: Stop and Remove Docker container
         if: always()
         run: |
-          docker stop fastapi_container
-          docker rm fastapi_container
-          
+          docker stop fastapi_container || true
+          docker rm fastapi_container || true
