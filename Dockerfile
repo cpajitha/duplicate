@@ -1,12 +1,5 @@
-# escape=`
-FROM python:3.10-windowsservercore-ltsc2022
-
-# Switch the default shell to PowerShell
-SHELL ["powershell", "-Command"]
-
-# Prevent Python from writing pyc files to disk and enable stdout/stderr logging
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Use a lightweight Linux-based Python image
+FROM python:3.10-slim
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -14,8 +7,8 @@ WORKDIR /app
 # Copy only requirements first to leverage Docker cache for dependencies
 COPY requirements.txt .
 
-# Upgrade pip and install dependencies (using PowerShell syntax)
-RUN python -m pip install --upgrade pip ; `
+# Upgrade pip and install dependencies
+RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code into the container
