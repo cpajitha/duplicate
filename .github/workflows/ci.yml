@@ -29,16 +29,23 @@ jobs:
       - name: Install Chrome and Chromedriver for Selenium
         run: |
           sudo apt update
-          sudo apt install -y wget curl unzip xvfb
+          
+          # Install necessary dependencies
+          sudo apt install -y wget curl unzip xvfb libgbm1 libasound2 libnspr4 \
+                              libnss3 libx11-xcb1 libxcomposite1 libxcursor1 \
+                              libxdamage1 libxfixes3 libxi6 libxrandr2 libxss1 libxtst6
           
           # Install Google Chrome
           wget -q -O google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo dpkg -i google-chrome.deb || sudo apt-get -f install -y
           
-          # Get Chrome version
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+' | head -1)
+          # Verify Chrome installation
+          google-chrome --version
           
-          # Fetch latest matching Chromedriver version
+          # Fetch Chrome version
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\\d+\\.\\d+\\.\\d+' | head -1)
+          
+          # Get the compatible Chromedriver version
           CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
           
           # Download and install Chromedriver
@@ -47,8 +54,7 @@ jobs:
           sudo mv chromedriver /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
           
-          # Verify installation
-          google-chrome --version
+          # Verify Chromedriver installation
           chromedriver --version
 
       - name: Run Selenium tests
