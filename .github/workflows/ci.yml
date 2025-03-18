@@ -38,14 +38,26 @@ jobs:
           sudo dpkg -i google-chrome.deb || sudo apt-get -f install -y
           google-chrome --version
 
+          # Get the Chrome major version
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f1,2,3)
+          echo "Chrome Version: $CHROME_VERSION"
+
           # Get the compatible Chromedriver version
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\\d+\\.\\d+\\.\\d+' | head -1)
           CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
-          
+          echo "Chromedriver Version: $CHROMEDRIVER_VERSION"
+
+          # Download and install Chromedriver
           wget -q -O chromedriver.zip "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
-          unzip chromedriver.zip
-          sudo mv chromedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/chromedriver
+
+          if [ -f chromedriver.zip ]; then
+              unzip chromedriver.zip
+              sudo mv chromedriver /usr/local/bin/
+              sudo chmod +x /usr/local/bin/chromedriver
+          else
+              echo "Chromedriver download failed!"
+              exit 1
+          fi
+
           chromedriver --version
 
       - name: Run Selenium tests
